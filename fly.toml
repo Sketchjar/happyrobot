@@ -1,39 +1,43 @@
-# fly.toml — replace `app` with the name you choose via `fly launch`.
-app = "happyrobot-inbound"
-primary_region = "iad"
+# fly.toml app configuration file generated for happyrobot-inbound-morning-shadow-9615 on 2026-05-27T01:06:48Z
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'happyrobot-inbound-morning-shadow-9615'
+primary_region = 'iad'
 
 [build]
-  dockerfile = "Dockerfile"
+  dockerfile = 'Dockerfile'
 
 [env]
-  NODE_ENV = "production"
-  PORT = "3000"
-  DATABASE_PATH = "/data/happyrobot.db"
+  DATABASE_PATH = '/data/happyrobot.db'
+  NODE_ENV = 'production'
+  PORT = '3000'
 
 [[mounts]]
-  source = "happyrobot_data"
-  destination = "/data"
+  source = 'happyrobot_data'
+  destination = '/data'
 
 [http_service]
-  internal_port = 3000
+  internal_port = 8080
   force_https = true
-  auto_stop_machines = "stop"
+  auto_stop_machines = 'stop'
   auto_start_machines = true
   min_machines_running = 0
-  processes = ["app"]
+  processes = ['app']
 
   [http_service.concurrency]
-    type = "requests"
-    soft_limit = 200
+    type = 'requests'
     hard_limit = 250
+    soft_limit = 200
 
-[[http_service.checks]]
-  grace_period = "10s"
-  interval = "30s"
-  method = "GET"
-  timeout = "5s"
-  path = "/api/health"
+  [[http_service.checks]]
+    interval = '30s'
+    timeout = '5s'
+    grace_period = '10s'
+    method = 'GET'
+    path = '/api/health'
 
 [[vm]]
-  size = "shared-cpu-1x"
-  memory = "512mb"
+  size = 'shared-cpu-1x'
+  memory = '512mb'
