@@ -1,7 +1,7 @@
 # Email to Carlos Becker
 
-**To:** c.becker@happyrobot.ai
-**CC:** <recruiter@happyrobot.ai>
+**To:** hello@abc.com
+**CC:** hello@abc.com
 **Subject:** Inbound Carrier Sales POC — ready for our walkthrough
 
 ---
@@ -18,11 +18,11 @@ Ahead of our meeting, I wanted to share what I've put together for the inbound c
 
 **Links**
 
-- Dashboard: <https://happyrobot-inbound.fly.dev/dashboard>
-- API: <https://happyrobot-inbound.fly.dev/api/health>
-- Code: <https://github.com/sketchjar/happyrobot-inbound>
-- HappyRobot workflow: <https://app.happyrobot.ai/workflows/...>
-- 5-min demo video: <https://www.loom.com/share/...>
+- Dashboard: https://happyrobot-rmmxjg.fly.dev/dashboard
+- API health: https://happyrobot-rmmxjg.fly.dev/api/health
+- Code: https://github.com/Sketchjar/happyrobot
+- HappyRobot workflow (editor): https://platform.happyrobot.ai/fdegauravchauhan/workflow/qphg214qzg4t/editor/37icomxqlrgx
+- 5-min demo video: _(to be added before sending)_
 
 **What I'd like to cover on the call**
 
