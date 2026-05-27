@@ -156,6 +156,6 @@ Sentiment and outcome are classified by HappyRobot's extraction nodes after the 
 
 - Live dashboard: <https://happyrobot-inbound.fly.dev/dashboard>
 - API health: <https://happyrobot-inbound.fly.dev/api/health>
-- Code: <https://github.com/gaurav-roy/happyrobot-inbound>
+- Code: <https://github.com/sketchjar/happyrobot-inbound>
 - HappyRobot workflow: <https://app.happyrobot.ai/workflows/...>
 - Demo video: <https://www.loom.com/share/...>
