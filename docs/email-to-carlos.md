@@ -20,7 +20,7 @@ Ahead of our meeting, I wanted to share what I've put together for the inbound c
 
 - Dashboard: <https://happyrobot-inbound.fly.dev/dashboard>
 - API: <https://happyrobot-inbound.fly.dev/api/health>
-- Code: <https://github.com/gaurav-roy/happyrobot-inbound>
+- Code: <https://github.com/sketchjar/happyrobot-inbound>
 - HappyRobot workflow: <https://app.happyrobot.ai/workflows/...>
 - 5-min demo video: <https://www.loom.com/share/...>
 
