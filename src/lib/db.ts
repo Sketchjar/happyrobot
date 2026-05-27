@@ -51,6 +51,27 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_calls_outcome ON calls(outcome);
 `);
 
+const loadCount = (db.prepare("SELECT COUNT(*) AS n FROM loads").get() as { n: number }).n;
+if (loadCount === 0) {
+  const seedPath = path.join(process.cwd(), "data", "seed-loads.json");
+  if (fs.existsSync(seedPath)) {
+    type SeedRow = LoadRow;
+    const seedLoads = JSON.parse(fs.readFileSync(seedPath, "utf8")) as SeedRow[];
+    const insert = db.prepare(
+      `INSERT OR IGNORE INTO loads
+       (load_id, origin, destination, pickup_datetime, delivery_datetime, equipment_type,
+        loadboard_rate, notes, weight, commodity_type, num_of_pieces, miles, dimensions)
+       VALUES
+       (@load_id, @origin, @destination, @pickup_datetime, @delivery_datetime, @equipment_type,
+        @loadboard_rate, @notes, @weight, @commodity_type, @num_of_pieces, @miles, @dimensions)`,
+    );
+    db.transaction((rows: SeedRow[]) => {
+      for (const row of rows) insert.run(row);
+    })(seedLoads);
+    console.log(`[db] Hydrated ${seedLoads.length} loads into empty DB at ${DB_PATH}`);
+  }
+}
+
 export default db;
 
 export type LoadRow = {
