@@ -1,0 +1,31 @@
+{
+  "name": "happyrobot-inbound-carrier-sales",
+  "version": "0.1.0",
+  "private": true,
+  "description": "HappyRobot FDE Technical Challenge — Inbound Carrier Sales POC. Next.js API + dashboard with FMCSA verification, load matching, negotiation, and call analytics.",
+  "author": "Claude and Gaurav",
+  "license": "MIT",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "seed": "tsx scripts/seed.ts",
+    "postinstall": "tsx scripts/seed.ts || true"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.3.0",
+    "next": "^15.1.6",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "recharts": "^2.13.3"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.11",
+    "@types/node": "^22.9.0",
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}

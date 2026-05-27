@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+.env
+.env.local
+data/happyrobot.db
+*.log
+README.md
+docs
+.vscode
+.idea
+.DS_Store
