@@ -1,5 +1,4 @@
-# fly.toml — replace `app` with the name you choose via `fly launch`.
-app = "happyrobot-inbound"
+app = "happyrobot-rmmxjg"
 primary_region = "iad"
 
 [build]
