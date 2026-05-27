@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "HappyRobot FDE Technical Challenge — Inbound Carrier Sales POC. Next.js API + dashboard with FMCSA verification, load matching, negotiation, and call analytics.",
-  "author": "Claude and Gaurav",
+  "author": "Gaurav",
   "license": "MIT",
   "scripts": {
     "dev": "next dev",

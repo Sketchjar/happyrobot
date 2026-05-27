@@ -4,7 +4,7 @@ A working proof-of-concept for the HappyRobot FDE technical challenge. An AI voi
 
 **Stack:** Next.js 15 (TypeScript) · SQLite · Docker · Fly.io
 
-**Authors:** Claude and Gaurav
+**Scenario** FDE Interview Submission
 
 ---
 

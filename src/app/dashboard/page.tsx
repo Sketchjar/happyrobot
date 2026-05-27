@@ -4,6 +4,8 @@ import { OutcomePie } from "@/components/dashboard/OutcomePie";
 import { SentimentBar } from "@/components/dashboard/SentimentBar";
 import { EquipmentChart } from "@/components/dashboard/EquipmentChart";
 import { CallsTable } from "@/components/dashboard/CallsTable";
+import { NegotiationFunnel, type FunnelRow } from "@/components/dashboard/NegotiationFunnel";
+import { DeclinedLanes, type LaneRow } from "@/components/dashboard/DeclinedLanes";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +16,12 @@ type AvgRow = {
   avg_final_rate: number | null;
   avg_loadboard_rate: number | null;
   avg_rate_delta: number | null;
+};
+
+type RevenueRow = {
+  total_revenue: number | null;
+  avg_deal_size: number | null;
+  booked_count: number;
 };
 
 function loadMetrics() {
@@ -29,6 +37,45 @@ function loadMetrics() {
        FROM calls`,
     )
     .get() as AvgRow;
+
+  const revenue = db
+    .prepare(
+      `SELECT
+         SUM(final_rate) AS total_revenue,
+         AVG(final_rate) AS avg_deal_size,
+         COUNT(*) AS booked_count
+       FROM calls
+       WHERE outcome = 'accepted' AND final_rate IS NOT NULL`,
+    )
+    .get() as RevenueRow;
+
+  const funnel = db
+    .prepare(
+      `SELECT
+         COUNT(*) AS total,
+         SUM(CASE WHEN carrier_name IS NOT NULL THEN 1 ELSE 0 END) AS verified,
+         SUM(CASE WHEN load_id IS NOT NULL THEN 1 ELSE 0 END) AS pitched,
+         SUM(CASE WHEN num_rounds > 0 THEN 1 ELSE 0 END) AS negotiated,
+         SUM(CASE WHEN outcome = 'accepted' THEN 1 ELSE 0 END) AS booked
+       FROM calls`,
+    )
+    .get() as FunnelRow;
+
+  const declinedLanes = db
+    .prepare(
+      `SELECT
+         l.origin AS origin,
+         l.destination AS destination,
+         COUNT(*) AS total_calls,
+         SUM(CASE WHEN c.outcome IN ('rejected', 'abandoned', 'no_match') THEN 1 ELSE 0 END) AS declines
+       FROM calls c
+       JOIN loads l ON l.load_id = c.load_id
+       GROUP BY l.origin, l.destination
+       ORDER BY (CAST(SUM(CASE WHEN c.outcome IN ('rejected','abandoned','no_match') THEN 1 ELSE 0 END) AS REAL) / COUNT(*)) DESC,
+                COUNT(*) DESC
+       LIMIT 5`,
+    )
+    .all() as LaneRow[];
 
   const byOutcome = db
     .prepare(`SELECT outcome, COUNT(*) AS n FROM calls GROUP BY outcome`)
@@ -60,11 +107,21 @@ function loadMetrics() {
     .prepare(`SELECT * FROM calls ORDER BY created_at DESC LIMIT 25`)
     .all() as CallRow[];
 
-  return { totals, byOutcome, bySentiment, byEquipment, recent };
+  return { totals, revenue, funnel, declinedLanes, byOutcome, bySentiment, byEquipment, recent };
+}
+
+function fmtUsd(n: number | null | undefined, opts: { compact?: boolean } = {}) {
+  if (n === null || n === undefined) return "$0";
+  if (opts.compact && n >= 1000) {
+    return `$${(n / 1000).toFixed(1)}K`;
+  }
+  return `$${Math.round(n).toLocaleString()}`;
 }
 
 export default function DashboardPage() {
-  const { totals, byOutcome, bySentiment, byEquipment, recent } = loadMetrics();
+  const { totals, revenue, funnel, declinedLanes, byOutcome, bySentiment, byEquipment, recent } =
+    loadMetrics();
+
   const conversion =
     totals.total_calls > 0 ? ((totals.accepted_calls / totals.total_calls) * 100).toFixed(1) : "0.0";
   const avgDelta = totals.avg_rate_delta;
@@ -96,11 +153,20 @@ export default function DashboardPage() {
         </div>
 
         <section className="kpi-grid">
+          <KpiCard
+            label="Revenue Booked"
+            value={fmtUsd(revenue.total_revenue, { compact: true })}
+            sublabel={
+              revenue.booked_count > 0
+                ? `${revenue.booked_count} booked · avg ${fmtUsd(revenue.avg_deal_size)}`
+                : "Waiting on first booking"
+            }
+          />
           <KpiCard label="Total Calls" value={totals.total_calls} sublabel="All time" />
           <KpiCard
             label="Conversion Rate"
             value={`${conversion}%`}
-            sublabel={`${totals.accepted_calls} accepted`}
+            sublabel={`${totals.accepted_calls} of ${totals.total_calls} accepted`}
             trend={
               totals.total_calls > 0
                 ? { direction: Number(conversion) >= 50 ? "up" : "flat", label: `${conversion}%` }
@@ -116,20 +182,41 @@ export default function DashboardPage() {
             label="Margin vs Loadboard"
             value={
               avgDelta !== null
-                ? `${avgDelta >= 0 ? "+" : "−"}$${Math.abs(avgDelta).toFixed(0)}`
+                ? `${avgDelta >= 0 ? "+" : "−"}${fmtUsd(Math.abs(avgDelta))}`
                 : "—"
             }
             sublabel={
               totals.avg_final_rate !== null
-                ? `Final avg $${totals.avg_final_rate.toFixed(0)}`
+                ? `Final avg ${fmtUsd(totals.avg_final_rate)}`
                 : "Waiting on first booked load"
             }
             trend={
               avgDelta !== null
-                ? { direction: deltaTrend, label: `${avgDelta >= 0 ? "+" : "−"}$${Math.abs(avgDelta).toFixed(0)}` }
+                ? {
+                    direction: deltaTrend,
+                    label: `${avgDelta >= 0 ? "+" : "−"}${fmtUsd(Math.abs(avgDelta))}`,
+                  }
                 : undefined
             }
           />
+        </section>
+
+        <section className="chart-grid">
+          <div className="panel">
+            <div className="panel-header">
+              <h2>Negotiation Funnel</h2>
+              <span className="panel-meta">where deals fall off</span>
+            </div>
+            <NegotiationFunnel data={funnel} />
+          </div>
+
+          <div className="panel">
+            <div className="panel-header">
+              <h2>Top Declined Lanes</h2>
+              <span className="panel-meta">action: re-price these</span>
+            </div>
+            <DeclinedLanes data={declinedLanes} />
+          </div>
         </section>
 
         <section className="chart-grid">
@@ -161,14 +248,14 @@ export default function DashboardPage() {
         <section className="panel">
           <div className="panel-header">
             <h2>Recent Calls</h2>
-            <span className="panel-meta">Last {recent.length}</span>
+            <span className="panel-meta">Click a row for details · Last {recent.length}</span>
           </div>
           <CallsTable calls={recent} />
         </section>
       </main>
 
       <footer className="footer">
-        <span>HappyRobot FDE POC · Built by Claude &amp; Gaurav</span>
+        <span>HappyRobot FDE POC</span>
         <span>Next.js · SQLite · Fly.io</span>
       </footer>
     </>

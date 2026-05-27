@@ -1,6 +1,6 @@
 # Acme Logistics — Inbound Carrier Sales Automation
 
-**Prepared by:** Gaurav (with Claude)
+**Prepared by:** Gaurav
 **Platform:** HappyRobot
 **Status:** Proof of concept, ready for pilot
 
